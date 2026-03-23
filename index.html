@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃什么？ - 随机美食推荐</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#FFF9F2] text-gray-900 min-h-screen font-['Noto_Sans_SC'] relative overflow-x-hidden">
+    <!-- School Selection Modal -->
+    <div id="school-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl transform scale-100 transition-all border-2 border-orange-100">
+            <h2 class="text-2xl font-bold text-orange-600 mb-6 text-center flex items-center justify-center gap-2">
+                <i data-lucide="map-pin"></i>
+                请选择你的学校
+            </h2>
+            <div class="space-y-4">
+                <button onclick="selectSchool('北京邮电大学沙河校区')" class="w-full py-4 px-6 bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold rounded-2xl border-2 border-orange-200 transition text-left flex items-center justify-between group">
+                    北京邮电大学沙河校区
+                    <i data-lucide="chevron-right" class="w-5 h-5 opacity-0 group-hover:opacity-100 transition"></i>
+                </button>
+                <button onclick="selectSchool('暂无')" class="w-full py-4 px-6 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold rounded-2xl border-2 border-gray-200 transition text-left flex items-center justify-between group">
+                    暂无
+                    <i data-lucide="chevron-right" class="w-5 h-5 opacity-0 group-hover:opacity-100 transition"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decorative Elements -->
+    <div class="fixed top-[-50px] right-[-50px] w-64 h-64 bg-orange-100 rounded-full blur-3xl opacity-50 z-0"></div>
+    <div class="fixed bottom-[-50px] left-[-50px] w-80 h-80 bg-orange-50 rounded-full blur-3xl opacity-50 z-0"></div>
+
+    <!-- Character Image (Fixed at top right) -->
+    <div class="fixed top-4 right-4 z-50 w-24 md:w-32 pointer-events-none float-animation">
+        <img src="character.png" alt="Character" class="w-full h-auto drop-shadow-2xl">
+        <div class="absolute -bottom-2 -left-4 bg-white px-3 py-1 rounded-full shadow-md text-[10px] md:text-xs font-bold text-orange-500 border border-orange-100 whitespace-nowrap">
+            吃什么好呢？✨
+        </div>
+    </div>
+
+    <div class="max-w-md mx-auto px-4 py-8 md:py-16 relative z-10">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-orange-600 mb-2">今天吃什么？</h1>
+            <div id="current-school-tag" class="inline-flex items-center gap-1 bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs font-bold cursor-pointer hover:bg-orange-200 transition">
+                <i data-lucide="map-pin" class="w-3 h-3"></i>
+                <span id="school-name-display">点击选择学校</span>
+            </div>
+        </header>
+
+        <!-- Main Card -->
+        <main class="bg-white rounded-3xl shadow-xl p-6 mb-6 text-center border border-gray-100">
+            <div id="result-container" class="min-h-[160px] flex flex-col items-center justify-center mb-6">
+                <div id="result-text" class="text-3xl font-bold text-gray-800 tracking-wider mb-2">点击下方开始</div>
+                <div id="result-detail" class="hidden space-y-1">
+                    <p id="result-location" class="text-sm text-orange-500 font-medium flex items-center justify-center gap-1">
+                        <i data-lucide="store" class="w-3 h-3"></i>
+                        <span></span>
+                    </p>
+                    <p id="result-price" class="text-sm text-gray-500 font-medium flex items-center justify-center gap-1">
+                        <i data-lucide="banknote" class="w-3 h-3"></i>
+                        <span></span>
+                    </p>
+                </div>
+            </div>
+            
+            <button id="roll-btn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition duration-200 transform hover:scale-[1.02] active:scale-[0.98] text-xl flex items-center justify-center gap-2">
+                <i data-lucide="dice-5"></i>
+                随机推荐
+            </button>
+        </main>
+
+        <!-- Rating & Comment Section (Hidden initially) -->
+        <section id="feedback-section" class="hidden mb-6 space-y-4">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold flex items-center gap-2">
+                        <i data-lucide="message-square" class="text-orange-500 w-5 h-5"></i>
+                        用户点评
+                    </h2>
+                    <div id="avg-rating" class="text-orange-500 font-bold flex items-center gap-1">
+                        <i data-lucide="star" class="w-4 h-4 fill-orange-500"></i>
+                        <span>0.0</span>
+                    </div>
+                </div>
+
+                <!-- Comment List -->
+                <div id="comment-list" class="space-y-3 mb-4 max-h-40 overflow-y-auto pr-2 text-sm">
+                    <!-- Comments will be inserted here -->
+                </div>
+
+                <!-- Add Comment -->
+                <div class="space-y-3 pt-4 border-t border-gray-50">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-gray-600">你的评价:</span>
+                        <div id="rating-stars" class="flex gap-1">
+                            <i data-lucide="star" class="star-btn w-5 h-5 cursor-pointer text-gray-300 hover:text-orange-400" onclick="handleStarClick(1)"></i>
+                            <i data-lucide="star" class="star-btn w-5 h-5 cursor-pointer text-gray-300 hover:text-orange-400" onclick="handleStarClick(2)"></i>
+                            <i data-lucide="star" class="star-btn w-5 h-5 cursor-pointer text-gray-300 hover:text-orange-400" onclick="handleStarClick(3)"></i>
+                            <i data-lucide="star" class="star-btn w-5 h-5 cursor-pointer text-gray-300 hover:text-orange-400" onclick="handleStarClick(4)"></i>
+                            <i data-lucide="star" class="star-btn w-5 h-5 cursor-pointer text-gray-300 hover:text-orange-400" onclick="handleStarClick(5)"></i>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="comment-input" placeholder="写下你的点评..." class="flex-1 bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        <button id="submit-feedback-btn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm font-bold transition">发布</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preferences & Settings -->
+        <section class="space-y-6">
+            <!-- Dietary Restrictions -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center gap-2 mb-4">
+                    <i data-lucide="ban" class="text-red-500 w-5 h-5"></i>
+                    <h2 class="text-lg font-semibold">我的忌口</h2>
+                </div>
+                <div class="flex gap-2 mb-3">
+                    <input type="text" id="restriction-input" placeholder="输入忌口 (如: 辣, 香菜)" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <button id="add-restriction-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl transition font-medium">添加</button>
+                </div>
+                <div id="restriction-tags" class="flex flex-wrap gap-2">
+                    <!-- Tags will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Manage Dishes -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="utensils" class="text-orange-500 w-5 h-5"></i>
+                        <h2 class="text-lg font-semibold">菜单库</h2>
+                    </div>
+                    <span id="dish-count" class="text-sm text-gray-400">0 道菜</span>
+                </div>
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="dish-input" placeholder="添加新菜品..." class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <button id="add-dish-btn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl transition font-medium">添加</button>
+                </div>
+
+                <div id="dish-list" class="max-h-60 overflow-y-auto space-y-2 pr-2">
+                    <!-- Dishes will be inserted here -->
+                </div>
+                
+                <button id="reset-btn" class="mt-4 text-sm text-gray-400 hover:text-red-500 flex items-center gap-1 transition">
+                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                    重置为默认菜单
+                </button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center mt-12 text-gray-400 text-sm">
+            数据已保存在浏览器中，离线可用
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

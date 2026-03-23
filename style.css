@@ -1,0 +1,95 @@
+/* Custom styles for modern appearance */
+:root {
+  --primary-color: #f97316; /* Tailwind orange-500 */
+}
+
+body {
+  background-color: #FFF9F2;
+}
+
+/* Character floating animation */
+.float-animation {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+/* Smooth glass effect for cards */
+main, .bg-white {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 237, 213, 0.5) !important;
+}
+
+/* Modal animation */
+#school-modal {
+  transition: opacity 0.3s ease;
+}
+
+#school-modal.hidden {
+  display: none;
+  opacity: 0;
+}
+
+/* Comment Item Style */
+.comment-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+.star-active {
+  color: #f97316 !important; /* orange-500 */
+  fill: #f97316;
+}
+
+/* Custom scrollbar for dish list */
+#dish-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+#dish-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#dish-list::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+#dish-list::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+/* Rolling animation */
+.rolling {
+  animation: roll 0.1s infinite linear;
+}
+
+@keyframes roll {
+  0% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+  50% { transform: scale(1.05) rotate(1deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+}
+
+/* Dish Tag Hover Animation */
+.tag-remove {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tag-remove:hover {
+  color: #ef4444; /* red-500 */
+}
+
+/* Smooth list entry */
+.dish-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
