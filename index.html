@@ -83,10 +83,21 @@
                         <i data-lucide="message-square" class="text-orange-500 w-5 h-5"></i>
                         用户点评
                     </h2>
-                    <div id="avg-rating" class="text-orange-500 font-bold flex items-center gap-1">
-                        <i data-lucide="star" class="w-4 h-4 fill-orange-500"></i>
-                        <span>0.0</span>
+                    <div class="flex items-center gap-2">
+                        <button id="ai-summary-btn" class="bg-gradient-to-r from-orange-400 to-amber-400 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md hover:scale-105 transition transform flex items-center gap-1">
+                            <i data-lucide="brain-circuit" class="w-3 h-3"></i>
+                            AI 总结
+                        </button>
+                        <div id="avg-rating" class="text-orange-500 font-bold flex items-center gap-1">
+                            <i data-lucide="star" class="w-4 h-4 fill-orange-500"></i>
+                            <span>0.0</span>
+                        </div>
                     </div>
+                </div>
+
+                <!-- AI Summary Box (Hidden initially) -->
+                <div id="ai-summary-box" class="hidden bg-orange-50 border-l-4 border-orange-400 p-3 mb-4 rounded-r-lg text-sm">
+                    <p id="ai-summary-text" class="text-orange-800"></p>
                 </div>
 
                 <!-- Comment List -->

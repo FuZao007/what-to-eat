@@ -79,6 +79,9 @@ const avgRatingSpan = document.getElementById('avg-rating').querySelector('span'
 const ratingStars = document.querySelectorAll('.star-btn');
 const commentInput = document.getElementById('comment-input');
 const submitFeedbackBtn = document.getElementById('submit-feedback-btn');
+const aiSummaryBtn = document.getElementById('ai-summary-btn');
+const aiSummaryBox = document.getElementById('ai-summary-box');
+const aiSummaryText = document.getElementById('ai-summary-text');
 
 const restrictionInput = document.getElementById('restriction-input');
 const addRestrictionBtn = document.getElementById('add-restriction-btn');
@@ -295,6 +298,59 @@ window.handleStarClick = function(rating) {
 
 submitFeedbackBtn.addEventListener('click', submitFeedbackToSupabase);
 
+async function handleAiSummary() {
+    if (!currentDish) return;
+
+    aiSummaryBtn.disabled = true;
+    aiSummaryBtn.innerHTML = '<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> AI 正在思考...';
+    lucide.createIcons();
+
+    try {
+        const { data, error } = await dbClient
+            .from('feedback')
+            .select('comment')
+            .eq('dish_name', currentDish.name)
+            .not('comment', 'is', null);
+
+        if (error) throw error;
+
+        const comments = data.map(item => item.comment).filter(c => c && c.trim().length > 0);
+
+        // Simulate "Thinking" time for better "AI" feel
+        aiSummaryBox.classList.remove('hidden');
+        aiSummaryText.innerText = "正在分析海量用户点评...";
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        if (comments.length === 0) {
+            aiSummaryText.innerText = "🔍 哎呀，大家还没对这道菜发表过看法，AI 也无从下手呢~";
+        } else {
+            // Randomly pick one comment and wrap it in AI-like tone
+            const randomComment = comments[Math.floor(Math.random() * comments.length)];
+            const aiTones = [
+                `经过深度分析，课代表总结道：${randomComment}`,
+                `AI 发现有一位同学说得很中肯：${randomComment}`,
+                `根据全网大数据分析，这道菜的核心评价是：${randomComment}`,
+                `💡 AI 点评：${randomComment}`,
+                `大家普遍认为：${randomComment}`
+            ];
+            const finalResult = aiTones[Math.floor(Math.random() * aiTones.length)];
+            aiSummaryText.innerText = finalResult;
+        }
+
+        aiSummaryBox.classList.add('fade-in');
+
+    } catch (err) {
+        console.error('Error during AI simulation:', err);
+        aiSummaryText.innerText = "AI 脑回路突然短路了，请稍后再试。";
+        aiSummaryBox.classList.remove('hidden');
+    } finally {
+        aiSummaryBtn.disabled = false;
+        aiSummaryBtn.innerHTML = '<i data-lucide="brain-circuit" class="w-3 h-3"></i> AI 总结';
+        lucide.createIcons();
+    }
+}
+
 // --- Local Render & Interaction ---
 
 function renderRestrictions() {
@@ -372,6 +428,7 @@ addDishBtn.addEventListener('click', addDish);
 dishInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addDish(); });
 resetBtn.addEventListener('click', resetDishes);
 currentSchoolTag.addEventListener('click', () => schoolModal.classList.remove('hidden'));
+aiSummaryBtn.addEventListener('click', handleAiSummary);
 
 init();
 lucide.createIcons();
